@@ -17,12 +17,6 @@ export const Cards = () => {
         </h2>
         <p>RAG + KG: Get contextual answers to your questions.</p>
       </Link>
-      <Link href="/ai-catalog" className={styles.card} rel="noopener noreferrer">
-        <h2>
-          AI Model Catalog
-        </h2>
-        <p>Browse and search AI models in the decentralized catalog.</p>
-      </Link>
     </div>
   );
 };
