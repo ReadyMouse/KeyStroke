@@ -1,0 +1,42 @@
+{
+  "name": "autodrive-write",
+  "version": "1.0.0",
+  "description": "AutoDrive (AI3) file upload integration for NEAR AI library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "example": "ts-node src/example.ts",
+    "test": "node test-upload.js",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "autodrive",
+    "ai3",
+    "near",
+    "blockchain",
+    "file-upload",
+    "ai-models"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@autonomys/auto-drive": "^1.0.0",
+    "@autonomys/auto-utils": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/smirking-face.git"
+  }
+}
