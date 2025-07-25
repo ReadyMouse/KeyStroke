@@ -18,12 +18,7 @@
 - `_includes/chat-interface.html` - Unit tests for the chat interface component.
 - `_includes/settings-page.html` - Settings page component with user profile and logout functionality.
 - `_includes/settings-page.html` - Unit tests for the settings page component.
-- `assets/js/ui.js` - JavaScript for UI interactions and placeholder functionality.
-- `assets/js/ui.test.js` - Unit tests for UI utilities.
-- `assets/js/fileValidation.js` - Utility functions for validating uploaded file types and sizes.
-- `assets/js/fileValidation.test.js` - Unit tests for file validation utilities.
-- `assets/js/upload.js` - Document upload functionality with drag-and-drop.
-- `assets/js/upload.test.js` - Unit tests for upload functionality.
+- `assets/css/main.scss` - Main SCSS file with global styles and CSS-only interactions.
 - `assets/css/main.scss` - Main SCSS file with global styles and imports.
 - `assets/css/components.scss` - Component-specific SCSS styles.
 - `index.html` - Home page with dashboard layout.
@@ -32,14 +27,15 @@
 
 ### Notes
 
-- Unit tests should typically be placed alongside the code files they are testing (e.g., `auth.js` and `auth.test.js` in the same directory).
+- This is a pure HTML/CSS implementation with no JavaScript dependencies.
+- All interactions are handled through CSS-only solutions (checkbox toggles, :target selectors).
 - Use `bundle exec jekyll serve` to run the development server.
 - Use `bundle exec jekyll build` to build the static site.
-- JavaScript tests can be run with a testing framework like Jest or Mocha.
+- The site works perfectly without JavaScript enabled.
 
 ## Tasks
 
-- [ ] 1.0 Project Setup and Foundation
+- [x] 1.0 Project Setup and Foundation
   - [x] 1.1 Initialize Jekyll project with Bundler and necessary Ruby gems
   - [x] 1.2 Set up Jekyll project structure with _layouts, _includes, and assets directories
   - [x] 1.3 Configure Jekyll configuration file (_config.yml) with site settings
@@ -47,18 +43,17 @@
   - [x] 1.5 Create basic HTML template with proper meta tags and accessibility
 
 - [ ] 2.0 Layout and Navigation Components
-  - [ ] 2.1 Create Header include (_includes/header.html) with logo, navigation links, and user controls
-  - [ ] 2.2 Create Footer include (_includes/footer.html) with contact info and legal links
-  - [ ] 2.3 Create default layout (_layouts/default.html) that includes Header, Footer, and content area
-  - [ ] 2.4 Implement responsive navigation menu for mobile devices
-  - [ ] 2.5 Add proper accessibility attributes and keyboard navigation
+  - [x] 2.1 Create Header include (_includes/header.html) with logo, navigation links, and user controls
+  - [x] 2.2 Create Footer include (_includes/footer.html) with contact info and legal links
+  - [x] 2.3 Create default layout (_layouts/default.html) that includes Header, Footer, and content area
+  - [x] 2.4 Implement responsive navigation menu for mobile devices
+  - [x] 2.5 Add proper accessibility attributes and keyboard navigation
 
-- [ ] 3.0 User Interface Elements
-  - [ ] 3.1 Create JavaScript UI module (assets/js/ui.js) for placeholder interactions
-  - [ ] 3.2 Implement LoginButton include (_includes/login-button.html) for visual purposes
-  - [ ] 3.3 Add placeholder user status display in Header
-  - [ ] 3.4 Add logout button in Settings page (visual only)
-  - [ ] 3.5 Create placeholder data for demonstration purposes
+- [x] 3.0 User Interface Elements
+  - [x] 3.1 Implement CSS-only login button with :target selector
+  - [x] 3.2 Add placeholder user status display in Header
+  - [ ] 3.3 Add logout button in Settings page (visual only)
+  - [ ] 3.4 Create placeholder data for demonstration purposes
 
 - [ ] 4.0 Dashboard and Document Management
   - [ ] 4.1 Create Dashboard include (_includes/dashboard.html) with card-based layout
@@ -68,11 +63,11 @@
   - [ ] 4.5 Add empty state for when no documents are uploaded
 
 - [ ] 5.0 Document Upload Functionality
-  - [ ] 5.1 Create DocumentUpload include (_includes/document-upload.html) with drag-and-drop interface
-  - [ ] 5.2 Implement file validation for supported formats (PDF, Word, Excel, PowerPoint, text)
-  - [ ] 5.3 Add file size limits and error handling
-  - [ ] 5.4 Implement upload progress indicators and confirmation messages
-  - [ ] 5.5 Create fileValidation utility functions (assets/js/fileValidation.js) for client-side validation
+  - [ ] 5.1 Create DocumentUpload include (_includes/document-upload.html) with file input interface
+  - [ ] 5.2 Add visual indicators for supported formats (PDF, Word, Excel, PowerPoint, text)
+  - [ ] 5.3 Add file size limit information and visual feedback
+  - [ ] 5.4 Implement CSS-only upload progress indicators and confirmation messages
+  - [ ] 5.5 Create visual file validation feedback using CSS
 
 - [ ] 6.0 Chat Interface Implementation
   - [ ] 6.1 Create ChatInterface include (_includes/chat-interface.html) with text input field
