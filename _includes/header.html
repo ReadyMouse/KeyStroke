@@ -9,7 +9,7 @@
     <div class="navbar-menu" id="navbar-menu" role="menu">
       <ul class="navbar-nav" role="menubar" aria-label="Primary navigation">
         <li class="nav-item" role="none">
-          <a class="nav-link" href="{{ '/' | relative_url }}" role="menuitem" aria-current="{% if page.url == '/' %}page{% endif %}" tabindex="0">
+          <a class="nav-link" href="{{ '/dashboard.html' | relative_url }}" role="menuitem" aria-current="{% if page.url contains '/dashboard' %}page{% endif %}" tabindex="0">
             Dashboard
           </a>
         </li>

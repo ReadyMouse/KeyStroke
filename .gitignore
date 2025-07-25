@@ -37,3 +37,7 @@ logs
 # Temporary files
 tmp/
 temp/
+RAG_KG.md
+RAG_KG.odt
+ai-dev-tasks-main/*
+tasks/*
