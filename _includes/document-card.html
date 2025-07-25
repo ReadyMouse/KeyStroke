@@ -1,0 +1,230 @@
+{% comment %}
+  Document Card Component
+  
+  Parameters:
+  - document: Object containing document data
+    - title: Document title
+    - type: File type (PDF, Word, Excel, etc.)
+    - size: File size
+    - upload_date: Upload date
+    - description: Document description
+    - tags: Array of tags
+    - id: Document ID
+  - show_actions: Boolean to show/hide action buttons (default: true)
+  - compact: Boolean for compact view (default: false)
+{% endcomment %}
+
+{% assign show_actions = include.show_actions | default: true %}
+{% assign compact = include.compact | default: false %}
+
+<div class="document-card" data-document-id="{{ include.document.id }}">
+  <div class="document-icon">
+    {% case include.document.type %}
+      {% when 'PDF' %}
+        📄
+      {% when 'Word' %}
+        📝
+      {% when 'Excel' %}
+        📊
+      {% when 'PowerPoint' %}
+        📈
+      {% when 'Text' %}
+        📋
+      {% when 'Image' %}
+        🖼️
+      {% else %}
+        📄
+    {% endcase %}
+  </div>
+  
+  <div class="document-info">
+    <h3 class="document-title">
+      <a href="/documents/{{ include.document.id }}" class="document-link">
+        {{ include.document.title }}
+      </a>
+    </h3>
+    
+    <p class="document-meta">
+      {{ include.document.type }} • {{ include.document.size }} • {{ include.document.upload_date }}
+    </p>
+    
+    {% unless compact %}
+      <p class="document-description">
+        {{ include.document.description }}
+      </p>
+      
+      {% if include.document.tags and include.document.tags.size > 0 %}
+        <div class="document-tags">
+          {% for tag in include.document.tags %}
+            <span class="tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endunless %}
+  </div>
+  
+  {% if show_actions %}
+    <div class="document-actions">
+      <button class="btn btn-sm btn-outline document-view-btn" 
+              data-document-id="{{ include.document.id }}"
+              title="View document">
+        <span class="icon">👁️</span>
+        View
+      </button>
+      
+      <button class="btn btn-sm btn-outline document-chat-btn" 
+              data-document-id="{{ include.document.id }}"
+              title="Chat about this document">
+        <span class="icon">💬</span>
+        Chat
+      </button>
+      
+      <div class="document-menu">
+        <button class="btn btn-sm btn-outline document-menu-btn" 
+                data-document-id="{{ include.document.id }}"
+                title="More options">
+          <span class="icon">⋯</span>
+        </button>
+        
+        <div class="document-menu-dropdown" data-document-id="{{ include.document.id }}">
+          <a href="/documents/{{ include.document.id }}/download" class="menu-item">
+            <span class="icon">⬇️</span>
+            Download
+          </a>
+          <a href="/documents/{{ include.document.id }}/share" class="menu-item">
+            <span class="icon">📤</span>
+            Share
+          </a>
+          <a href="/documents/{{ include.document.id }}/rename" class="menu-item">
+            <span class="icon">✏️</span>
+            Rename
+          </a>
+          <button class="menu-item document-delete-btn" 
+                  data-document-id="{{ include.document.id }}">
+            <span class="icon">🗑️</span>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Document View Modal -->
+<div id="document-view-modal-{{ include.document.id }}" class="modal document-view-modal">
+  <div class="modal-content document-viewer">
+    <div class="modal-header">
+      <h2>{{ include.document.title }}</h2>
+      <button class="modal-close" data-modal="document-view-modal-{{ include.document.id }}">
+        <span class="icon">✕</span>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="document-viewer-content">
+        <div class="document-preview">
+          <div class="document-preview-placeholder">
+            <span class="preview-icon">
+              {% case include.document.type %}
+                {% when 'PDF' %}
+                  📄
+                {% when 'Word' %}
+                  📝
+                {% when 'Excel' %}
+                  📊
+                {% when 'PowerPoint' %}
+                  📈
+                {% when 'Text' %}
+                  📋
+                {% when 'Image' %}
+                  🖼️
+                {% else %}
+                  📄
+              {% endcase %}
+            </span>
+            <p>Document preview not available</p>
+            <a href="/documents/{{ include.document.id }}/download" class="btn btn-primary">
+              Download to view
+            </a>
+          </div>
+        </div>
+        
+        <div class="document-info-sidebar">
+          <div class="info-section">
+            <h3>Document Information</h3>
+            <div class="info-item">
+              <span class="info-label">Type:</span>
+              <span class="info-value">{{ include.document.type }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Size:</span>
+              <span class="info-value">{{ include.document.size }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Uploaded:</span>
+              <span class="info-value">{{ include.document.upload_date }}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <h3>Description</h3>
+            <p>{{ include.document.description }}</p>
+          </div>
+          
+          {% if include.document.tags and include.document.tags.size > 0 %}
+            <div class="info-section">
+              <h3>Tags</h3>
+              <div class="tags-list">
+                {% for tag in include.document.tags %}
+                  <span class="tag">{{ tag }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <div class="info-section">
+            <h3>Actions</h3>
+            <div class="action-buttons">
+              <a href="/documents/{{ include.document.id }}/download" class="btn btn-outline">
+                <span class="icon">⬇️</span>
+                Download
+              </a>
+              <a href="/chat.html?document={{ include.document.id }}" class="btn btn-primary">
+                <span class="icon">💬</span>
+                Chat about this document
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirmation-modal-{{ include.document.id }}" class="modal delete-confirmation-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Delete Document</h2>
+      <button class="modal-close" data-modal="delete-confirmation-modal-{{ include.document.id }}">
+        <span class="icon">✕</span>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p>Are you sure you want to delete "<strong>{{ include.document.title }}</strong>"?</p>
+      <p class="warning-text">This action cannot be undone.</p>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn btn-secondary modal-close" 
+              data-modal="delete-confirmation-modal-{{ include.document.id }}">
+        Cancel
+      </button>
+      <button class="btn btn-danger confirm-delete-btn" 
+              data-document-id="{{ include.document.id }}">
+        Delete Document
+      </button>
+    </div>
+  </div>
+</div> 

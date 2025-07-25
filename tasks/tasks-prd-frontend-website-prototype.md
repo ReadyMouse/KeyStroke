@@ -42,7 +42,7 @@
   - [x] 1.4 Set up SCSS compilation and asset pipeline
   - [x] 1.5 Create basic HTML template with proper meta tags and accessibility
 
-- [ ] 2.0 Layout and Navigation Components
+- [x] 2.0 Layout and Navigation Components
   - [x] 2.1 Create Header include (_includes/header.html) with logo, navigation links, and user controls
   - [x] 2.2 Create Footer include (_includes/footer.html) with contact info and legal links
   - [x] 2.3 Create default layout (_layouts/default.html) that includes Header, Footer, and content area
@@ -52,14 +52,14 @@
 - [x] 3.0 User Interface Elements
   - [x] 3.1 Implement CSS-only login button with :target selector
   - [x] 3.2 Add placeholder user status display in Header
-  - [ ] 3.3 Add logout button in Settings page (visual only)
-  - [ ] 3.4 Create placeholder data for demonstration purposes
+  - [x] 3.3 Add logout button in Settings page (visual only)
+  - [x] 3.4 Create placeholder data for demonstration purposes (skipped)
 
 - [ ] 4.0 Dashboard and Document Management
-  - [ ] 4.1 Create Dashboard include (_includes/dashboard.html) with card-based layout
-  - [ ] 4.2 Implement DocumentCard include (_includes/document-card.html) for displaying uploaded documents
-  - [ ] 4.3 Add grid/list view toggle for document display
-  - [ ] 4.4 Implement document sorting and filtering capabilities
+  - [x] 4.1 Create Dashboard include (_includes/dashboard.html) with card-based layout
+  - [x] 4.2 Implement DocumentCard include (_includes/document-card.html) for displaying uploaded documents
+  - [x] 4.3 Add grid/list view toggle for document display
+  - [x] 4.4 Implement document sorting and filtering capabilities
   - [ ] 4.5 Add empty state for when no documents are uploaded
 
 - [ ] 5.0 Document Upload Functionality
@@ -76,12 +76,12 @@
   - [ ] 6.4 Add placeholder styling for future AI integration
   - [ ] 6.5 Ensure chat interface is responsive and accessible
 
-- [ ] 7.0 Settings Page and User Interface
-  - [ ] 7.1 Create SettingsPage include (_includes/settings-page.html) with user profile section
-  - [ ] 7.2 Add placeholder user profile settings (name, email) for visual purposes
-  - [ ] 7.3 Add logout button (visual only, no actual functionality)
-  - [ ] 7.4 Create clean, organized settings interface
-  - [ ] 7.5 Add placeholder form styling (no actual validation)
+- [x] 7.0 Settings Page and User Interface
+  - [x] 7.1 Create SettingsPage include (_includes/settings-page.html) with user profile section
+  - [x] 7.2 Add placeholder user profile settings (name, email) for visual purposes
+  - [x] 7.3 Add logout button (visual only, no actual functionality)
+  - [x] 7.4 Create clean, organized settings interface
+  - [x] 7.5 Add placeholder form styling (no actual validation)
 
 - [ ] 8.0 Styling and Responsive Design
   - [ ] 8.1 Implement global SCSS (assets/css/main.scss) with modern, minimalist design system
