@@ -5,7 +5,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "tsx src/main.ts"
+    "dev": "tsx src/main.ts",
+    "test:download": "tsx src/test_download_script.ts",
+    "test:upload": "tsx src/test_upload_script.ts",
+    "test:search": "tsx src/test_search_script.ts"
   },
   "dependencies": {
     "@autonomys/auto-drive": "^1.5.11",
