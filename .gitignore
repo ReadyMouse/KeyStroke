@@ -1,3 +1,6 @@
+# Environment variables
+.env
+
 # Jekyll build output
 _site
 .sass-cache
@@ -13,6 +16,11 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
 
 # OS generated files
 .DS_Store
@@ -41,3 +49,4 @@ RAG_KG.md
 RAG_KG.odt
 ai-dev-tasks-main/*
 tasks/*
+test_download_1754590025715.mp3

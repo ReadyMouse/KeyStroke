@@ -1,53 +1,86 @@
-// This is a test script that downloads a file from the Autodrive API and logs the file size 
-// and content to the console. 
+// This is a test script that downloads a file from the Autodrive API using utilities
+// and logs the file size and content to the console. 
 //
 // July 2025 - Author: ReadyMouse
 // ============================================================================
 // IMPORTS
 // ============================================================================
-import { createAutoDriveApi } from '@autonomys/auto-drive'
-import { NetworkId } from '@autonomys/auto-utils'
-import dotenv from 'dotenv'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import {
+  getDefaultApi,
+  loadEnvironment,
+  validateEnvironment
+} from './utils/api-setup'
+
+import {
+  downloadFileAsBuffer,
+  analyzeFile
+} from './utils/file-operations'
+
+import {
+  logger,
+  logSection,
+  logExecutionTime
+} from './utils/logging'
 
 // ============================================================================
-// ENVIRONMENT SETUP
+// MAIN DOWNLOAD FUNCTION
 // ============================================================================
-// Get __dirname equivalent for ES modules
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
-// Load environment variables from the top-level directory
-const envPath = path.resolve(__dirname, '../../../.env')
-console.log('Looking for .env file at:', envPath)
-dotenv.config({ path: envPath })
-
-// ============================================================================
-// API CONFIGURATION
-// ============================================================================
-const apiKey = process.env.AUTODRIVE_API_KEY
-console.log('API Key found:', apiKey ? 'Yes' : 'No')
-if (!apiKey) {
-  throw new Error('AUTODRIVE_API_KEY environment variable is required')
+async function testDownload() {
+  logSection('📥 TESTING FILE DOWNLOAD')
+  
+  try {
+    // Initialize API
+    loadEnvironment()
+    validateEnvironment()
+    const api = getDefaultApi()
+    
+    // Test with the known working CID from the original script
+    const testCid = 'bafkr6ihkuzw2g5l4nmcxpqprqstkl3mzixmp2exyf2dl33a62lhwf26aaa'
+    
+    logger.info(`Testing download with CID: ${testCid}`)
+    
+    const fileBuffer = await logExecutionTime('File Download', async () => {
+      return await downloadFileAsBuffer(api, testCid)
+    })
+    
+    // Analyze the downloaded file
+    const analysis = analyzeFile(fileBuffer)
+    
+    logger.success('✅ File downloaded successfully!')
+    logger.info('File Analysis:', {
+      size: `${analysis.size} bytes`,
+      sizeKB: `${analysis.sizeKB} KB`,
+      isText: analysis.isText,
+      preview: analysis.preview
+    })
+    
+    // Save the file locally with proper extension
+    const fs = await import('fs/promises')
+    const timestamp = Date.now()
+    
+    // Use a default extension
+    const outputPath = `./test_download_${timestamp}.bin`
+    
+    try {
+      await fs.writeFile(outputPath, fileBuffer)
+      logger.success(`💾 File saved to: ${outputPath}`)
+      logger.info(`📁 File type: BIN`)
+    } catch (error) {
+      logger.error('Failed to save file:', error)
+    }
+    
+  } catch (error) {
+    logger.error('❌ Download test failed:', error)
+    throw error
+  }
 }
 
-const api = createAutoDriveApi({ apiKey, network: NetworkId.TAURUS }) // Initialize your API instance with API key
+// ============================================================================
+// RUN THE SCRIPT
+// ============================================================================
 
-// ============================================================================
-// FILE DOWNLOAD LOGIC
-// ============================================================================
-try {
-  const cid = 'bafkr6ihkuzw2g5l4nmcxpqprqstkl3mzixmp2exyf2dl33a62lhwf26aaa' // random file cid
-  const stream = await api.downloadFile(cid)
-  let file = Buffer.alloc(0)
-  for await (const chunk of stream) {
-    file = Buffer.concat([file, chunk])
-  }
-  console.log('File downloaded successfully!')
-  console.log('File size:', file.length, 'bytes')
-  console.log('File content (first 200 characters):', file.toString('utf8').substring(0, 200))
-} catch (error) {
-  console.error('Error downloading file:', error)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  testDownload().catch(console.error)
 }
 
