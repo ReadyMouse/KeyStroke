@@ -49,7 +49,19 @@ export async function searchFiles(
 ): Promise<SearchResult[]> {
   try {
     console.log(`🔍 Searching for: "${searchValue}"`)
-    const results = await api.searchByNameOrCID(searchValue)
+    // Get all files first - use empty string to get everything
+    const allFiles = await api.searchByNameOrCID('')
+    
+    // Convert API results to SearchResult type - no filtering needed for crawler
+    const results = allFiles.map(file => ({
+      name: file.name,
+      headCid: file.headCid,
+      size: file.size,
+      type: file.type,
+      uploadStatus: String(file.uploadStatus),
+      mimeType: 'type' in file && file.type === 'file' ? file.mimeType : undefined,
+      owners: file.owners
+    } as SearchResult))
     
     console.log(`✅ Search completed! Found ${results.length} result(s)`)
     

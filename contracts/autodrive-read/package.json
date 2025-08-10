@@ -6,9 +6,9 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "tsx src/main.ts",
-    "test:download": "tsx src/test_download_script.ts",
-    "test:upload": "tsx src/test_upload_script.ts",
-    "test:search": "tsx src/test_search_script.ts"
+    "discover": "tsx src/discover_script.ts",
+    "test:cid": "tsx src/test_CID_downloadable.ts",
+    "download": "tsx src/download_files.ts"
   },
   "dependencies": {
     "@autonomys/auto-drive": "^1.5.11",
@@ -17,7 +17,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "tsx": "^4.0.0"
+    "ts-node": "^10.9.2",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
   }
 }

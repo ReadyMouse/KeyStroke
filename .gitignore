@@ -1,6 +1,10 @@
 # Environment variables
 .env
 
+# Autodrive database
+autodrive_database.csv
+autodrive_discovered.csv
+
 # Jekyll build output
 _site
 .sass-cache
