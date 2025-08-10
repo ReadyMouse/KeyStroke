@@ -4,6 +4,7 @@
 # Autodrive database
 autodrive_database.csv
 autodrive_discovered.csv
+autodrive_discovery_state.json
 
 # Jekyll build output
 _site
