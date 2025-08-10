@@ -1,9 +1,9 @@
 # Environment variables
 .env
 
-# Autodrive database
-autodrive_database.csv
-autodrive_discovered.csv
+# Autodrive database 
+archived/*
+autodrive_records.csv
 autodrive_discovery_state.json
 
 # Jekyll build output
