@@ -30,10 +30,15 @@ interface DiscoveredFile {
   name?: string
   size?: number
   mimeType?: string
-  uploadStatus?: string
+  scope: string
+  type?: string
+  tested: boolean
+  testedAt?: number
+  isDownloadable: boolean
+  downloadError?: string
+  errorType?: 'encrypted' | 'server_issue' | 'not_found' | 'unknown'
   owners?: any[]
   discoveredAt: number
-  tested: boolean
 }
 
 interface FileRecord {
@@ -41,13 +46,15 @@ interface FileRecord {
   name?: string
   size?: number
   mimeType?: string
-  uploadStatus?: string
-  owners?: any[]
+  scope: string
+  type?: string
+  tested: boolean
+  testedAt?: number
   isDownloadable: boolean
   downloadError?: string
   errorType?: 'encrypted' | 'server_issue' | 'not_found' | 'unknown'
-  fileType?: string
-  timestamp: number
+  owners?: any[]
+  discoveredAt: number
 }
 
 interface CrawlResults {
@@ -147,10 +154,13 @@ async function saveDiscoveredFile(file: any): Promise<void> {
     name: file.name,
     size: file.size,
     mimeType: file.mimeType,
-    uploadStatus: file.uploadStatus,
+    scope: file.scope || 'unknown',
+    type: file.type || 'unknown',
     owners: file.owners,
     discoveredAt: Date.now(),
-    tested: false
+    tested: false,
+    testedAt: undefined,
+    isDownloadable: false
   }
   
   // Check if file exists to determine if we need to write header
@@ -163,11 +173,11 @@ async function saveDiscoveredFile(file: any): Promise<void> {
   }
   
   // Prepare CSV row for this record
-  const csvRow = `"${record.cid}","${record.name || ''}","${record.size || ''}","${record.mimeType || ''}","${record.uploadStatus || ''}","${record.discoveredAt}","${record.tested}"`
+  const csvRow = `"${record.cid}","${record.name || ''}","${record.size || ''}","${record.mimeType || ''}","${record.scope}","${record.type || ''}","${record.discoveredAt}","${record.tested}","${record.testedAt || ''}","${record.isDownloadable}","${record.downloadError || ''}","${record.errorType || ''}"`
   
   if (!fileExists) {
     // Create new file with header
-    const csvHeader = 'cid,name,size,mimeType,uploadStatus,discoveredAt,tested\n'
+    const csvHeader = 'cid,name,size,mimeType,scope,type,discoveredAt,tested,testedAt,isDownloadable,downloadError,errorType\n'
     await fs.writeFile(csvPath, csvHeader + csvRow + '\n')
     logger.info(`💾 Created discovered files database and saved: ${record.name || 'Unnamed'}`)
   } else {
@@ -217,10 +227,11 @@ async function getUntestedCids(): Promise<Set<string>> {
     // Skip header
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i]
-      if (line.endsWith(',"false"')) {
+      const columns = line.split(',').map(col => col.replace(/"/g, ''))
+      // Check if tested is false (column 8)
+      if (columns[7] === 'false') {
         // Extract CID from the first column
-        const cid = line.split(',')[0].replace(/"/g, '')
-        untestedCids.add(cid)
+        untestedCids.add(columns[0])
       }
     }
   } catch {
@@ -242,7 +253,18 @@ async function isCidAlreadyTested(cid: string): Promise<boolean> {
   try {
     await fs.access(csvPath)
     const content = await fs.readFile(csvPath, 'utf8')
-    return content.includes(cid)
+    const lines = content.split('\n').filter(line => line.trim())
+    
+    // Skip header
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i]
+      const columns = line.split(',').map(col => col.replace(/"/g, ''))
+      if (columns[0] === cid) {
+        // Check if tested is true (column 8)
+        return columns[7] === 'true'
+      }
+    }
+    return false
   } catch {
     // File doesn't exist, so CID hasn't been tested
     return false
@@ -259,28 +281,12 @@ async function saveRecordToDatabase(record: FileRecord) {
   const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   logger.info(`📁 Using database path: ${csvPath}`)
   
-  // Check if file exists to determine if we need to write header
-  let fileExists = false
-  try {
-    await fs.access(csvPath)
-    fileExists = true
-  } catch {
-    // File doesn't exist, will create it
-  }
-  
   // Prepare CSV row for this record
-  const csvRow = `"${record.cid}","${record.name || ''}","${record.size || ''}","${record.mimeType || ''}","${record.uploadStatus || ''}","${record.isDownloadable}","${record.downloadError || ''}","${record.errorType || ''}","${record.fileType || ''}","${record.timestamp}"`
+  const csvRow = `"${record.cid}","${record.name || ''}","${record.size || ''}","${record.mimeType || ''}","${record.scope}","${record.type || ''}","${record.discoveredAt}","${record.tested}","${record.testedAt || ''}","${record.isDownloadable}","${record.downloadError || ''}","${record.errorType || ''}"` 
   
-      if (!fileExists) {
-      // Create new file with header
-      const csvHeader = 'cid,name,size,mimeType,uploadStatus,isDownloadable,downloadError,errorType,fileType,timestamp\n'
-    await fs.writeFile(csvPath, csvHeader + csvRow + '\n')
-    logger.info(`💾 Created database and saved: ${record.name || 'Unnamed'}`)
-  } else {
-    // Append to existing file
-    await fs.appendFile(csvPath, csvRow + '\n')
-    logger.info(`💾 Saved to database: ${record.name || 'Unnamed'}`)
-  }
+  // Append to existing file
+  await fs.appendFile(csvPath, csvRow + '\n')
+  logger.info(`💾 Saved to database: ${record.name || 'Unnamed'}`)
 }
 
 /**
@@ -326,10 +332,13 @@ async function testFileDownload(
     name: file.name,
     size: file.size,
     mimeType: file.mimeType,
-    uploadStatus: file.uploadStatus,
+    scope: file.scope || 'unknown',
+    type: file.type || 'unknown',
     owners: file.owners,
-    isDownloadable: false,
-    timestamp: Date.now()
+    discoveredAt: Date.now(),
+    tested: true,
+    testedAt: Date.now(),
+    isDownloadable: false
   }
   
   try {
@@ -339,7 +348,7 @@ async function testFileDownload(
     // Analyze the downloaded file
     const analysis = analyzeFile(buffer)
     record.isDownloadable = true
-    record.fileType = analysis.isText ? 'text' : 'binary'
+    record.type = analysis.isText ? 'text' : 'binary'
     
     logger.success(`✅ Downloadable: ${file.name || 'Unnamed'}`)
     
@@ -389,7 +398,7 @@ async function testFileDownload(
 /**
  * Gets database statistics
  */
-async function getDatabaseStats(): Promise<{ total: number, downloadable: number, failed: number }> {
+async function getDatabaseStats(): Promise<{ total: number, tested: number, downloadable: number, failed: number }> {
   const fs = await import('fs/promises')
   const path = await import('path')
   // Save database in the current directory
@@ -402,12 +411,19 @@ async function getDatabaseStats(): Promise<{ total: number, downloadable: number
     const lines = content.split('\n').filter(line => line.trim() && !line.startsWith('cid,'))
     
     const total = lines.length
-    const downloadable = lines.filter(line => line.includes('"true"')).length
-    const failed = total - downloadable
+    const tested = lines.filter(line => {
+      const columns = line.split(',').map(col => col.replace(/"/g, ''))
+      return columns[7] === 'true' // tested column
+    }).length
+    const downloadable = lines.filter(line => {
+      const columns = line.split(',').map(col => col.replace(/"/g, ''))
+      return columns[9] === 'true' // isDownloadable column
+    }).length
+    const failed = tested - downloadable // only count failed among tested files
     
-    return { total, downloadable, failed }
+    return { total, tested, downloadable, failed }
   } catch {
-    return { total: 0, downloadable: 0, failed: 0 }
+    return { total: 0, tested: 0, downloadable: 0, failed: 0 }
   }
 }
 
@@ -434,7 +450,7 @@ async function testDiscoveredFiles() {
     
     // Get current database stats
     const stats = await getDatabaseStats()
-    logger.info(`📊 Current database: ${stats.total} files tested (${stats.downloadable} downloadable, ${stats.failed} failed)`)
+    logger.info(`📊 Current database: ${stats.total} total files (${stats.downloadable} downloadable out of ${stats.tested} tested)`)
     
     // Set up retry and concurrency options
     const concurrency = Math.max(1, Number(getArg('concurrency', '4')))
@@ -476,7 +492,7 @@ async function testDiscoveredFiles() {
       
       // Log intermediate stats
       const stats = await getDatabaseStats()
-      logger.info(`\n📊 Progress: ${stats.total} files tested (${stats.downloadable} downloadable, ${stats.failed} failed)`)
+      logger.info(`\n📊 Progress: ${stats.total} total files (${stats.downloadable} downloadable out of ${stats.tested} tested)`)
       
       // Add delay between batches to be nice to the API
       if (i + batchSize < filesToTest.length) {
@@ -488,9 +504,9 @@ async function testDiscoveredFiles() {
     // Final stats
     const finalStats = await getDatabaseStats()
     logger.info(`\n📊 Final database stats:`)
-    logger.info(`   Total files tested: ${finalStats.total}`)
+    logger.info(`   Total files: ${finalStats.total}`)
+    logger.info(`   Files tested: ${finalStats.tested}`)
     logger.info(`   Downloadable: ${finalStats.downloadable}`)
-    logger.info(`   Failed: ${finalStats.failed}`)
     
     logger.success('✅ Testing completed!')
     
