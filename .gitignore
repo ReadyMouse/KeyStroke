@@ -2,7 +2,7 @@
 .env
 
 # Autodrive database 
-archived/*
+contracts/autodrive-read/archived/*
 autodrive_records.csv
 autodrive_discovery_state.json
 

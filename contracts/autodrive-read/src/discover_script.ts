@@ -26,6 +26,8 @@ interface DiscoveredFile {
   owners?: any[]
   discoveredAt: number
   type?: string
+  tested: boolean
+  isDownloadable: boolean
 }
 
 // ==========================================================================
@@ -77,7 +79,7 @@ async function saveDiscoveredFile(file: any): Promise<void> {
   const fs = await import('fs/promises')
   const path = await import('path')
   // Save to the discovered files database
-  const csvPath = path.join(process.cwd(), 'autodrive_discovered.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   
   const record: DiscoveredFile = {
     cid: file.headCid,
@@ -87,7 +89,9 @@ async function saveDiscoveredFile(file: any): Promise<void> {
     uploadStatus: file.uploadStatus,
     owners: file.owners,
     discoveredAt: Date.now(),
-    type: 'type' in file ? file.type : 'unknown'
+    type: 'type' in file ? file.type : 'unknown',
+    tested: false,
+    isDownloadable: false
   }
   
   // Check if file exists to determine if we need to write header
@@ -100,11 +104,11 @@ async function saveDiscoveredFile(file: any): Promise<void> {
   }
   
   // Prepare CSV row for this record
-  const csvRow = `"${record.cid}","${record.name || ''}","${record.size || ''}","${record.mimeType || ''}","${record.uploadStatus || ''}","${record.type || ''}","${record.discoveredAt}"`
+  const csvRow = `"${record.cid}","${record.name || ''}","${record.size || ''}","${record.mimeType || ''}","${record.uploadStatus || ''}","${record.type || ''}","${record.discoveredAt}","${record.tested}","${record.isDownloadable}"`
   
   if (!fileExists) {
     // Create new file with header
-    const csvHeader = 'cid,name,size,mimeType,uploadStatus,type,discoveredAt\n'
+    const csvHeader = 'cid,name,size,mimeType,uploadStatus,type,discoveredAt,tested,isDownloadable\n'
     await fs.writeFile(csvPath, csvHeader + csvRow + '\n')
     logger.info(`💾 Created database and saved: ${record.name || 'Unnamed'}`)
   } else {
@@ -120,7 +124,7 @@ async function saveDiscoveredFile(file: any): Promise<void> {
 async function getDatabaseStats(): Promise<{ total: number }> {
   const fs = await import('fs/promises')
   const path = await import('path')
-  const csvPath = path.join(process.cwd(), 'autodrive_discovered.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   
   try {
     await fs.access(csvPath)
@@ -136,8 +140,61 @@ async function getDatabaseStats(): Promise<{ total: number }> {
 // MAIN CRAWLER FUNCTION
 // ============================================================================
 
+/**
+ * Migrates existing CSV data to include new fields if they're missing
+ */
+async function migrateExistingData(): Promise<void> {
+  const fs = await import('fs/promises')
+  const path = await import('path')
+  const oldCsvPath = path.join(process.cwd(), 'autodrive_discovered.csv')
+  const newCsvPath = path.join(process.cwd(), 'autodrive_records.csv')
+  
+  try {
+    // Check if old file exists
+    await fs.access(oldCsvPath)
+    const content = await fs.readFile(oldCsvPath, 'utf8')
+    const lines = content.split('\n').filter(line => line.trim())
+    
+    if (lines.length === 0) return
+    
+    logger.info('🔄 Creating new records file from existing data...')
+    
+    // Create new header
+    const newHeader = 'cid,name,size,mimeType,uploadStatus,type,discoveredAt,tested,isDownloadable'
+    
+    // Process all data lines
+    const newLines = [newHeader]
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i]
+      if (!line.trim()) continue
+      
+      // Add new fields to existing data
+      // First ensure the line ends with a quote for the timestamp
+      const fixedLine = line.trim().endsWith('"') ? line : `${line}"`
+      const newLine = `${fixedLine},"false","false"`
+      newLines.push(newLine)
+    }
+    
+    // Write new file
+    await fs.writeFile(newCsvPath, newLines.join('\n') + '\n')
+    logger.info(`✅ Created ${newCsvPath} with ${newLines.length - 1} records`)
+    logger.info('ℹ️  Original data preserved in autodrive_discovered.csv')
+    
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      // Old file doesn't exist, start fresh
+      logger.info('📊 Starting fresh with new records file')
+      return
+    }
+    logger.warn('⚠️ Migration failed:', error)
+  }
+}
+
 async function discoverFiles() {
   logSection('🔍 AUTODRIVE FILE DISCOVERY')
+  
+  // Migrate existing data if needed
+  await migrateExistingData()
   
   try {
     // Initialize API

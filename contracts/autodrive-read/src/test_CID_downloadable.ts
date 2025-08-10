@@ -140,7 +140,7 @@ async function saveDiscoveredFile(file: any): Promise<void> {
   const fs = await import('fs/promises')
   const path = await import('path')
   // Save database in the current directory
-  const csvPath = path.join(process.cwd(), 'autodrive_discovered.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   
   const record: DiscoveredFile = {
     cid: file.headCid,
@@ -183,7 +183,7 @@ async function saveDiscoveredFile(file: any): Promise<void> {
 async function markCidAsTested(cid: string): Promise<void> {
   const fs = await import('fs/promises')
   const path = await import('path')
-  const csvPath = path.join(process.cwd(), 'autodrive_discovered.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   
   try {
     const content = await fs.readFile(csvPath, 'utf8')
@@ -207,7 +207,7 @@ async function markCidAsTested(cid: string): Promise<void> {
 async function getUntestedCids(): Promise<Set<string>> {
   const fs = await import('fs/promises')
   const path = await import('path')
-  const csvPath = path.join(process.cwd(), 'autodrive_discovered.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   
   const untestedCids = new Set<string>()
   try {
@@ -236,7 +236,7 @@ async function isCidAlreadyTested(cid: string): Promise<boolean> {
   const fs = await import('fs/promises')
   const path = await import('path')
   // Save database in the current directory
-  const csvPath = path.join(process.cwd(), 'autodrive_database.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   logger.info(`📁 Using database path: ${csvPath}`)
   
   try {
@@ -256,7 +256,7 @@ async function saveRecordToDatabase(record: FileRecord) {
   const fs = await import('fs/promises')
   const path = await import('path')
   // Save database in the current directory
-  const csvPath = path.join(process.cwd(), 'autodrive_database.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   logger.info(`📁 Using database path: ${csvPath}`)
   
   // Check if file exists to determine if we need to write header
@@ -393,7 +393,7 @@ async function getDatabaseStats(): Promise<{ total: number, downloadable: number
   const fs = await import('fs/promises')
   const path = await import('path')
   // Save database in the current directory
-  const csvPath = path.join(process.cwd(), 'autodrive_database.csv')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   logger.info(`📁 Using database path: ${csvPath}`)
   
   try {

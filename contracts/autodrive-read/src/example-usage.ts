@@ -36,7 +36,8 @@ import {
   logSection,
   logProgress,
   logTable,
-  logExecutionTime
+  logExecutionTime,
+  logMemoryUsage
 } from './utils/logging'
 
 // ============================================================================
@@ -106,9 +107,28 @@ async function demonstrateUtilities() {
       }
     }
     
-    // 5. Batch Operations
-    logSection('📦 Batch Operations')
+    // 5. Download Operations
+    logSection('📦 Download Operations')
     
+    // Example 1: Download a single file by CID
+    logger.info('Example 1: Download single file')
+    if (searchResults.length > 0) {
+      const singleFile = searchResults[0]
+      const buffer = await logExecutionTime('Single File Download', async () => {
+        return await downloadFileAsBuffer(api, singleFile.headCid)
+      })
+      
+      const analysis = analyzeFile(buffer)
+      logger.info('Single File Analysis:', {
+        cid: singleFile.headCid,
+        size: `${Math.round(buffer.length / 1024 * 100) / 100} KB`,
+        type: analysis.isText ? 'Text' : 'Binary',
+        preview: analysis.preview
+      })
+    }
+    
+    // Example 2: Download multiple files
+    logger.info('\nExample 2: Download multiple files')
     const cids = extractCids(searchResults.slice(0, 3)) // Take first 3 files
     if (cids.length > 0) {
       const downloadedFiles = await logExecutionTime('Batch Download', async () => {
@@ -125,6 +145,17 @@ async function demonstrateUtilities() {
       }))
       
       logTable(downloadTable, 'Downloaded Files Summary')
+      
+      // Example usage of download script options:
+      logger.info('\nDownload Script Usage Examples:')
+      logger.info('1. Download single file:')
+      logger.info('   npm run download bafkr6ihkuzw2g5l4nmcxpqprqstkl3mzixmp2exyf2dl33a62lhwf26aaa')
+      logger.info('\n2. Download multiple files:')
+      logger.info('   npm run download CID1 CID2 CID3')
+      logger.info('\n3. Download all files (with caution):')
+      logger.info('   npm run download --all')
+      logger.info('\n4. Specify output directory:')
+      logger.info('   npm run download CID1 --output=./my-downloads')
     }
     
     // 6. Memory Usage

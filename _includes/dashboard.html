@@ -4,7 +4,7 @@
     <header class="dashboard-header">
       <div class="dashboard-title">
         <h1>Dashboard</h1>
-        <p class="dashboard-subtitle">Welcome back! Here's an overview of your documents and activity.</p>
+        <p class="dashboard-subtitle">Welcome! Stats about the Autonomys DNS.</p>
       </div>
       <div class="dashboard-actions">
         <a href="#upload-modal" class="btn btn-primary">
@@ -365,28 +365,22 @@
     <section class="quick-actions-section">
       <h2>Quick Actions</h2>
       <div class="quick-actions-grid">
-        <a href="/chat.html" class="quick-action-card">
+        <a href="{{ '/pages/chat.html' | relative_url }}" class="quick-action-card">
           <div class="quick-action-icon">💬</div>
           <h3>Start Chat</h3>
           <p>Ask questions about your documents</p>
         </a>
         
-        <a href="/settings.html" class="quick-action-card">
+        <a href="{{ '/pages/settings.html' | relative_url }}" class="quick-action-card">
           <div class="quick-action-icon">⚙️</div>
           <h3>Settings</h3>
           <p>Manage your account preferences</p>
         </a>
         
-        <a href="#help-modal" class="quick-action-card">
+        <a href="{{ '/pages/help.html' | relative_url }}" class="quick-action-card">
           <div class="quick-action-icon">❓</div>
           <h3>Help & Support</h3>
           <p>Get help and view documentation</p>
-        </a>
-        
-        <a href="#upgrade-modal" class="quick-action-card">
-          <div class="quick-action-icon">⭐</div>
-          <h3>Upgrade Plan</h3>
-          <p>Unlock advanced features</p>
         </a>
       </div>
     </section>
@@ -397,6 +391,9 @@
 <div id="upload-modal" class="modal">
   <div class="modal-content">
     <h2>Upload Document</h2>
+    <div class="demo-warning" style="margin-bottom: 1rem; padding: 0.75rem; background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; color: #856404;">
+      <strong>⚠️ Demo Only:</strong> This is a demonstration page. The upload feature is not yet available.
+    </div>
     <p>Drag and drop files here or click to browse</p>
     <div class="upload-area">
       <div class="upload-placeholder">
