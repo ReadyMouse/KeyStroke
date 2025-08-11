@@ -67,6 +67,21 @@ def format_timestamp():
     now = datetime.now(timezone.utc)
     return now.strftime("%B %d, %Y at %H:%M UTC")
 
+def get_available_photos():
+    """Get list of available photos from the downloads/photos directory."""
+    base_dir = Path(__file__).parent.parent
+    photos_dir = base_dir / 'contracts' / 'autodrive-read' / 'downloads' / 'photos'
+    
+    if not photos_dir.exists():
+        return []
+        
+    photo_files = []
+    for ext in ['.jpg', '.jpeg', '.png', '.gif']:
+        photo_files.extend(photos_dir.glob(f'*{ext}'))
+    
+    # Convert to relative paths from project root
+    return [str(photo.relative_to(base_dir)) for photo in photo_files]
+
 def generate_stats():
     """Generate statistics from CSV files."""
     base_dir = Path(__file__).parent.parent
@@ -75,12 +90,14 @@ def generate_stats():
     file_counts = count_files_by_scope(discovered_csv)
     total_storage = count_total_storage(discovered_csv) 
     photos = count_photos(discovered_csv)
+    available_photos = get_available_photos()
 
     stats = {
         'timestamp': format_timestamp(),
         'files': file_counts,
         'total_storage': total_storage,
-        'photos': photos
+        'photos': photos,
+        'available_photos': available_photos
     }
     
     # Write stats to Jekyll _data directory

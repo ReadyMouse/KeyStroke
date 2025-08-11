@@ -50,11 +50,34 @@
     <section class="stats-section">
       <div class="stats-grid">
         <div class="stat-card tall-card">
-          <div class="stat-icon">📸</div>
+          <div class="stat-icon">📸 Random Photo</div>
           <div class="stat-content">
             <h3>Random Photo</h3>
             <div class="photo-preview">
-              <img src="{{ site.data.autodrive_stats.random_photo }}" alt="Random Photo">
+              {% if site.data.autodrive_stats.available_photos.size > 0 %}
+                {% assign random_photo = site.data.autodrive_stats.available_photos | sample %}
+                <img src="/{{ random_photo }}" alt="Potentially Encrypted Photo or Compressed">
+                <form onsubmit="return false;" class="photo-refresh">
+                  <script>
+                    const photos = {{ site.data.autodrive_stats.available_photos | jsonify }};
+                    document.querySelector('.photo-refresh').addEventListener('submit', function(e) {
+                      e.preventDefault();
+                      const randomPhoto = photos[Math.floor(Math.random() * photos.length)];
+                      const img = this.parentElement.querySelector('img');
+                      img.src = '/' + randomPhoto;
+                    });
+                  </script>
+                  <button type="submit" class="btn btn-outline">
+                    <span class="icon">🔄</span>
+                    New Random Photo
+                  </button>
+                </form>
+              {% else %}
+                <div class="empty-photo">
+                  <span class="icon">📷</span>
+                  <p>No photos available</p>
+                </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -63,7 +86,7 @@
           <div class="stat-content">
             <h3>Random File</h3>
             <div class="photo-preview">
-              <img src="{{ site.data.autodrive_stats.random_photo }}" alt="Random File">
+              <img src="{{ site.data.autodrive_stats.random_photo }}" alt="Coming Soon">
             </div>
           </div>
         </div>
