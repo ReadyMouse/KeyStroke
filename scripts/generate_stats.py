@@ -19,7 +19,7 @@ def count_files_by_scope(csv_path):
     try:
         counts = {'public': 0, 'private': 0}
         with open(csv_path, 'r') as f:
-            reader = csv.DictReader(f)
+            reader = csv.DictReader(f, quoting=csv.QUOTE_ALL)
             for row in reader:
                 scope = row.get('scope', '').lower()
                 if scope in counts:
@@ -29,6 +29,38 @@ def count_files_by_scope(csv_path):
         return counts
     except FileNotFoundError:
         return {'total': 0, 'public': 0, 'private': 0}
+
+def count_total_storage(csv_path):
+    """Count total storage in the CSV."""
+    try:
+        total_storage = 0
+        with open(csv_path, 'r') as f:
+            reader = csv.DictReader(f, quoting=csv.QUOTE_ALL)
+            for row in reader:
+                size_str = row.get('size', '0')
+                try:
+                    # Remove quotes and convert to int
+                    size = int(size_str.strip('"'))
+                    total_storage += size
+                except (ValueError, AttributeError):
+                    # Skip non-numeric sizes
+                    continue
+        return total_storage/1e9 # Convert to GB
+    except FileNotFoundError:
+        return 0
+
+def count_photos(csv_path):
+    """Count numbers of photos in the CSV."""
+    try:
+        photo_count = 0
+        with open(csv_path, 'r') as f:
+            reader = csv.DictReader(f, quoting=csv.QUOTE_ALL)
+            for row in reader:
+                if row.get('mimeType', '').startswith('image/'):
+                    photo_count += 1
+        return photo_count
+    except FileNotFoundError:
+        return 0
 
 def format_timestamp():
     """Format current time as 'January 30, 2024 at 14:30 UTC'"""
@@ -41,10 +73,14 @@ def generate_stats():
     discovered_csv = base_dir / 'contracts' / 'autodrive-read' / 'autodrive_records.csv'
     
     file_counts = count_files_by_scope(discovered_csv)
-    
+    total_storage = count_total_storage(discovered_csv) 
+    photos = count_photos(discovered_csv)
+
     stats = {
         'timestamp': format_timestamp(),
-        'files': file_counts
+        'files': file_counts,
+        'total_storage': total_storage,
+        'photos': photos
     }
     
     # Write stats to Jekyll _data directory

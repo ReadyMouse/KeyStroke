@@ -1,8 +1,10 @@
 {
-  "timestamp": "August 10, 2025 at 15:01 UTC",
+  "timestamp": "August 11, 2025 at 02:20 UTC",
   "files": {
-    "public": 32534,
+    "public": 89671,
     "private": 0,
-    "total": 32534
-  }
+    "total": 89671
+  },
+  "total_storage": 1.192023755,
+  "photos": 222
 }

@@ -48,6 +48,39 @@ interface ProgressState {
   seenCids: string[]
 }
 
+/**
+ * Loads existing CIDs from the CSV database to prevent duplicates
+ */
+async function loadExistingCids(): Promise<Set<string>> {
+  const fs = await import('fs/promises')
+  const path = await import('path')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
+  
+  try {
+    await fs.access(csvPath)
+    const content = await fs.readFile(csvPath, 'utf8')
+    const lines = content.split('\n').filter(line => line.trim() && !line.startsWith('cid,'))
+    
+    const existingCids = new Set<string>()
+    for (const line of lines) {
+      const fields = line.split(',')
+      if (fields.length > 0) {
+        // Remove quotes from CID field
+        const cid = fields[0].replace(/"/g, '')
+        if (cid) {
+          existingCids.add(cid)
+        }
+      }
+    }
+    
+    logger.info(`📚 Loaded ${existingCids.size} existing CIDs from database`)
+    return existingCids
+  } catch {
+    logger.info('📚 No existing database found, starting fresh')
+    return new Set<string>()
+  }
+}
+
 async function loadProgressState(): Promise<ProgressState | null> {
   const fs = await import('fs/promises')
   const path = await import('path')
@@ -140,6 +173,52 @@ async function getDatabaseStats(): Promise<{ total: number }> {
   }
 }
 
+/**
+ * Removes duplicate entries from the CSV database
+ * Keeps the first occurrence of each CID
+ */
+async function removeDuplicates(): Promise<void> {
+  const fs = await import('fs/promises')
+  const path = await import('path')
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
+  
+  try {
+    await fs.access(csvPath)
+    const content = await fs.readFile(csvPath, 'utf8')
+    const lines = content.split('\n')
+    const header = lines[0]
+    const dataLines = lines.slice(1).filter(line => line.trim())
+    
+    const seenCids = new Set<string>()
+    const uniqueLines: string[] = []
+    let duplicatesRemoved = 0
+    
+    for (const line of dataLines) {
+      const fields = line.split(',')
+      if (fields.length > 0) {
+        const cid = fields[0].replace(/"/g, '')
+        if (cid && !seenCids.has(cid)) {
+          seenCids.add(cid)
+          uniqueLines.push(line)
+        } else if (cid) {
+          duplicatesRemoved++
+        }
+      }
+    }
+    
+    // Write back the cleaned data
+    const cleanedContent = header + '\n' + uniqueLines.join('\n') + '\n'
+    await fs.writeFile(csvPath, cleanedContent)
+    
+    logger.info(`🧹 Removed ${duplicatesRemoved} duplicate entries`)
+    logger.info(`📊 Database now contains ${uniqueLines.length} unique entries`)
+    
+  } catch (error) {
+    logger.error('Failed to remove duplicates:', error)
+    throw error
+  }
+}
+
 // ============================================================================
 // MAIN CRAWLER FUNCTION
 // ============================================================================
@@ -165,9 +244,18 @@ async function discoverFiles() {
     // Try different scopes
     const scopes = ['public', 'private']
     
-    // Load previous state if exists
+    // Load existing CIDs from database and previous state
+    const existingCids = await loadExistingCids()
     const previousState = await loadProgressState()
-    const seenCids = new Set<string>(previousState?.seenCids || [])
+    
+    // Merge existing CIDs with seen CIDs from previous run
+    const seenCids = new Set<string>([...existingCids])
+    if (previousState?.seenCids) {
+      previousState.seenCids.forEach(cid => seenCids.add(cid))
+    }
+    
+    logger.info(`📋 Total CIDs to skip (existing + previous): ${seenCids.size}`)
+    
     let totalDiscovered = 0
     
     // Start from where we left off
@@ -284,5 +372,25 @@ async function discoverFiles() {
 // ============================================================================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  discoverFiles().catch(console.error)
+  const args = process.argv.slice(2)
+  
+  if (args.includes('--clean-duplicates')) {
+    logSection('🧹 CLEANING DUPLICATES')
+    removeDuplicates().catch(console.error)
+  } else if (args.includes('--discover')) {
+    discoverFiles().catch(console.error)
+  } else {
+    // Default behavior: clean duplicates first, then discover
+    logSection('🚀 STARTING AUTODRIVE DISCOVERY')
+    console.log('Available options:')
+    console.log('  --clean-duplicates  : Remove existing duplicates from database')
+    console.log('  --discover          : Run discovery (with duplicate prevention)')
+    console.log('  (no args)          : Clean duplicates then run discovery')
+    console.log('')
+    
+    // Clean duplicates first, then run discovery
+    removeDuplicates()
+      .then(() => discoverFiles())
+      .catch(console.error)
+  }
 }

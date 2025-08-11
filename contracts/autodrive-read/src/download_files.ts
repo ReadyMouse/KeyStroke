@@ -2,8 +2,7 @@
 // July 2025 - Author: ReadyMouse
 
 import { loadEnvironment, validateEnvironment, getDefaultApi } from './utils/api-setup'
-import { downloadFileAsBuffer } from './utils/file-operations'
-import { analyzeFile } from './utils/file-operations'
+import { downloadFileToPath } from './utils/file-operations'
 import { logger, logSection, logExecutionTime } from './utils/logging'
 import fs from 'fs/promises'
 import path from 'path'
@@ -25,8 +24,8 @@ interface FileRecord {
 /**
  * Reads the database and returns downloadable files
  */
-async function getDownloadableFiles(): Promise<FileRecord[]> {
-  const csvPath = path.join(process.cwd(), 'autodrive_database.csv')
+async function getDownloadableFiles(filterType: 'photos' | 'all' = 'all', limit?: number): Promise<FileRecord[]> {
+  const csvPath = path.join(process.cwd(), 'autodrive_records.csv')
   
   try {
     const content = await fs.readFile(csvPath, 'utf8')
@@ -36,21 +35,29 @@ async function getDownloadableFiles(): Promise<FileRecord[]> {
     
     for (const line of lines) {
       const columns = line.split(',').map(col => col.replace(/"/g, ''))
-      if (columns.length >= 6 && columns[5] === 'true') {
-        downloadableFiles.push({
-          cid: columns[0],
-          name: columns[1],
-          size: parseInt(columns[2]) || undefined,
-          mimeType: columns[3],
-          uploadStatus: columns[4],
-          isDownloadable: true,
-          fileType: columns[7],
-          timestamp: parseInt(columns[8]) || 0
-        })
+      if (columns.length >= 4) { // We just need up to the mimeType column
+        // Check if it's a photo based on mimeType
+        const mimeType = columns[3]
+        const isPhoto = mimeType?.startsWith('image/')
+        
+        if (filterType === 'all' || (filterType === 'photos' && isPhoto)) {
+          downloadableFiles.push({
+            cid: columns[0],
+            name: columns[1],
+            size: parseInt(columns[2]) || undefined,
+            mimeType: columns[3],
+            uploadStatus: columns[4] || undefined,
+            isDownloadable: false, // We'll try to download regardless
+            fileType: columns[5] || undefined,
+            timestamp: parseInt(columns[6]) || Date.now() // Use current time if not available
+          })
+        }
       }
     }
     
-    return downloadableFiles
+    // Sort by timestamp (newest first) and apply limit if specified
+    const sortedFiles = downloadableFiles.sort((a, b) => b.timestamp - a.timestamp)
+    return limit ? sortedFiles.slice(0, limit) : sortedFiles
   } catch (error) {
     logger.error('Failed to read database:', error)
     return []
@@ -68,19 +75,6 @@ async function downloadAndSaveFile(api: any, file: FileRecord | string, download
   try {
     logger.info(`📥 Downloading: ${name || cid}`)
     
-    const buffer = await logExecutionTime('Download', async () => {
-      return await downloadFileAsBuffer(api, cid)
-    })
-
-    // Analyze the downloaded file
-    const analysis = analyzeFile(buffer)
-    logger.info('File Analysis:', {
-      size: `${analysis.size} bytes`,
-      sizeKB: `${analysis.sizeKB} KB`,
-      isText: analysis.isText,
-      preview: analysis.preview
-    })
-    
     // Create downloads directory if it doesn't exist
     await fs.mkdir(downloadsDir, { recursive: true })
     
@@ -88,8 +82,6 @@ async function downloadAndSaveFile(api: any, file: FileRecord | string, download
     let extension = 'bin'
     if (mimeType) {
       extension = mimeType.split('/')[1] || 'bin'
-    } else if (analysis.isText) {
-      extension = 'txt'
     }
 
     const filename = name ? 
@@ -98,10 +90,10 @@ async function downloadAndSaveFile(api: any, file: FileRecord | string, download
     
     const filePath = path.join(downloadsDir, filename)
     
-    // Save file
-    await fs.writeFile(filePath, buffer)
+    // Download and save file directly to avoid buffer manipulation
+    await downloadFileToPath(api, cid, filePath)
     
-    logger.success(`✅ Saved: ${filename} (${buffer.length} bytes)`)
+    logger.success(`✅ Saved: ${filename}`)
     
   } catch (error) {
     logger.error(`❌ Failed to download ${name || cid}: ${error}`)
@@ -125,9 +117,11 @@ async function downloadFiles() {
     const hasFlag = (name: string) => args.includes(`--${name}`)
 
     // Get download options
+    const downloadPhotos = hasFlag('photos')
     const downloadAll = hasFlag('all')
     const cids = args.filter(arg => !arg.startsWith('--'))
-    const outputDir = getArg('output') || './downloads'
+    const outputDir = getArg('output') || './downloads/photos'
+    const limit = parseInt(getArg('limit') || '5')
 
     // Initialize API
     loadEnvironment()
@@ -135,16 +129,16 @@ async function downloadFiles() {
     const api = getDefaultApi()
 
     // Handle different download modes
-    if (downloadAll) {
-      logger.warn('⚠️  Warning: Downloading all files from database. This could take a while...')
-      const downloadableFiles = await getDownloadableFiles()
+    if (downloadPhotos || downloadAll) {
+      const filterType = downloadAll ? 'all' : 'photos'
+      const downloadableFiles = await getDownloadableFiles(filterType, downloadPhotos ? limit : undefined)
       
       if (downloadableFiles.length === 0) {
-        logger.warn('No downloadable files found in database')
+        logger.warn(`No ${filterType} found in database`)
         return
       }
       
-      logger.info(`Found ${downloadableFiles.length} downloadable files:`)
+      logger.info(`Found ${downloadableFiles.length} ${filterType}:`)
       downloadableFiles.forEach((file, index) => {
         logger.info(`  ${index + 1}. ${file.name || 'Unnamed'} (${file.cid})`)
         logger.info(`     Size: ${file.size || 'unknown'} bytes, Type: ${file.mimeType || 'unknown'}`)
@@ -171,12 +165,16 @@ async function downloadFiles() {
     else {
       logger.error('❌ No files specified to download')
       logger.info('Usage:')
+      logger.info('  Download photos (default limit 5):')
+      logger.info('    npm run download --photos')
+      logger.info('  Download photos with custom limit:')
+      logger.info('    npm run download --photos --limit=10')
       logger.info('  Download specific files:')
       logger.info('    npm run download CID1 CID2 CID3')
-      logger.info('  Download all files from database (not recommended):')
+      logger.info('  Download all files (not recommended):')
       logger.info('    npm run download --all')
       logger.info('  Specify output directory:')
-      logger.info('    npm run download CID1 --output=./my-downloads')
+      logger.info('    npm run download --photos --output=./my-photos')
     }
     
   } catch (error) {

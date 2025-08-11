@@ -22,32 +22,49 @@
           <div class="stat-icon">📊</div>
           <div class="stat-content">
             <h3 class="stat-number">{{ site.data.autodrive_stats.files.total }}</h3>
-            <p class="stat-label">Public: {{ site.data.autodrive_stats.files.public }}</p>
-            <p class="stat-label">Private: {{ site.data.autodrive_stats.files.private }}</p>
+            <!-- <p class="stat-label">Public: {{ site.data.autodrive_stats.files.public }}</p>
+            <p class="stat-label">Private: {{ site.data.autodrive_stats.files.private }}</p> -->
+            <p class="stat-label">Files</p>
           </div>
         </div>
         
         <div class="stat-card">
           <div class="stat-icon">💾</div>
           <div class="stat-content">
-            <h3 class="stat-number">12.9 MB</h3>
+            <h3 class="stat-number">{{ site.data.autodrive_stats.total_storage }} GB</h3>
             <p class="stat-label">Storage Used</p>
           </div>
         </div>
-        
+               
         <div class="stat-card">
-          <div class="stat-icon">💬</div>
+          <div class="stat-icon">📸</div>
           <div class="stat-content">
-            <h3 class="stat-number">8</h3>
-            <p class="stat-label">Chat Conversations</p>
+            <h3 class="stat-number">{{ site.data.autodrive_stats.photos }}</h3>
+            <p class="stat-label">Photos</p>
           </div>
         </div>
-        
-        <div class="stat-card">
-          <div class="stat-icon">📅</div>
+      </div>
+    </section>
+
+    <!-- Random Photo/File Cards -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card tall-card">
+          <div class="stat-icon">📸</div>
           <div class="stat-content">
-            <h3 class="stat-number">3</h3>
-            <p class="stat-label">This Month</p>
+            <h3>Random Photo</h3>
+            <div class="photo-preview">
+              <img src="{{ site.data.autodrive_stats.random_photo }}" alt="Random Photo">
+            </div>
+          </div>
+        </div>
+        <div class="stat-card tall-card">
+          <div class="stat-icon">📄</div>
+          <div class="stat-content">
+            <h3>Random File</h3>
+            <div class="photo-preview">
+              <img src="{{ site.data.autodrive_stats.random_photo }}" alt="Random File">
+            </div>
           </div>
         </div>
       </div>
@@ -112,7 +129,7 @@
           <div class="document-icon">📄</div>
           <div class="document-info">
             <h3 class="document-title">
-              <a href="/documents/project-requirements" class="document-link">Project Requirements Document</a>
+              <a href="/documents/project-requirements" class="document-link">Example: Project Requirements Document</a>
             </h3>
             <p class="document-meta">PDF • 2.4 MB • Jan 20, 2025</p>
             <p class="document-description">Complete project specifications and requirements for the new system.</p>
@@ -122,9 +139,10 @@
               <span class="tag">specifications</span>
             </div>
           </div>
+
           <div class="document-actions">
             <button class="btn btn-sm btn-outline document-view-btn" data-document-id="project-requirements">
-              <span class="icon">👁️</span>
+              <span class="icon">🔍</span>
               View
             </button>
             <button class="btn btn-sm btn-outline document-chat-btn" data-document-id="project-requirements">
@@ -156,208 +174,11 @@
             </div>
           </div>
         </div>
-
-        <div class="document-card" data-document-id="financial-report" data-type="Excel" data-date="2025-01-18" data-name="Financial Report Q4 2024">
-          <div class="document-icon">📊</div>
-          <div class="document-info">
-            <h3 class="document-title">
-              <a href="/documents/financial-report" class="document-link">Financial Report Q4 2024</a>
-            </h3>
-            <p class="document-meta">Excel • 1.8 MB • Jan 18, 2025</p>
-            <p class="document-description">Quarterly financial analysis and projections for Q4 2024.</p>
-            <div class="document-tags">
-              <span class="tag">finance</span>
-              <span class="tag">reports</span>
-              <span class="tag">quarterly</span>
-            </div>
-          </div>
-          <div class="document-actions">
-            <button class="btn btn-sm btn-outline document-view-btn" data-document-id="financial-report">
-              <span class="icon">👁️</span>
-              View
-            </button>
-            <button class="btn btn-sm btn-outline document-chat-btn" data-document-id="financial-report">
-              <span class="icon">💬</span>
-              Chat
-            </button>
-            <div class="document-menu">
-              <button class="btn btn-sm btn-outline document-menu-btn" data-document-id="financial-report">
-                <span class="icon">⋯</span>
-              </button>
-              <div class="document-menu-dropdown" data-document-id="financial-report">
-                <a href="/documents/financial-report/download" class="menu-item">
-                  <span class="icon">⬇️</span>
-                  Download
-                </a>
-                <a href="/documents/financial-report/share" class="menu-item">
-                  <span class="icon">📤</span>
-                  Share
-                </a>
-                <a href="/documents/financial-report/rename" class="menu-item">
-                  <span class="icon">✏️</span>
-                  Rename
-                </a>
-                <button class="menu-item document-delete-btn" data-document-id="financial-report">
-                  <span class="icon">🗑️</span>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="document-card" data-document-id="marketing-strategy" data-type="PowerPoint" data-date="2025-01-16" data-name="Marketing Strategy Presentation">
-          <div class="document-icon">📈</div>
-          <div class="document-info">
-            <h3 class="document-title">
-              <a href="/documents/marketing-strategy" class="document-link">Marketing Strategy Presentation</a>
-            </h3>
-            <p class="document-meta">PowerPoint • 5.2 MB • Jan 16, 2025</p>
-            <p class="document-description">Annual marketing strategy and campaign plans for 2025.</p>
-            <div class="document-tags">
-              <span class="tag">marketing</span>
-              <span class="tag">strategy</span>
-              <span class="tag">presentation</span>
-            </div>
-          </div>
-          <div class="document-actions">
-            <button class="btn btn-sm btn-outline document-view-btn" data-document-id="marketing-strategy">
-              <span class="icon">👁️</span>
-              View
-            </button>
-            <button class="btn btn-sm btn-outline document-chat-btn" data-document-id="marketing-strategy">
-              <span class="icon">💬</span>
-              Chat
-            </button>
-            <div class="document-menu">
-              <button class="btn btn-sm btn-outline document-menu-btn" data-document-id="marketing-strategy">
-                <span class="icon">⋯</span>
-              </button>
-              <div class="document-menu-dropdown" data-document-id="marketing-strategy">
-                <a href="/documents/marketing-strategy/download" class="menu-item">
-                  <span class="icon">⬇️</span>
-                  Download
-                </a>
-                <a href="/documents/marketing-strategy/share" class="menu-item">
-                  <span class="icon">📤</span>
-                  Share
-                </a>
-                <a href="/documents/marketing-strategy/rename" class="menu-item">
-                  <span class="icon">✏️</span>
-                  Rename
-                </a>
-                <button class="menu-item document-delete-btn" data-document-id="marketing-strategy">
-                  <span class="icon">🗑️</span>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="document-card" data-document-id="technical-docs" data-type="Word" data-date="2025-01-14" data-name="Technical Documentation">
-          <div class="document-icon">📝</div>
-          <div class="document-info">
-            <h3 class="document-title">
-              <a href="/documents/technical-docs" class="document-link">Technical Documentation</a>
-            </h3>
-            <p class="document-meta">Word • 3.1 MB • Jan 14, 2025</p>
-            <p class="document-description">System architecture and technical specifications documentation.</p>
-            <div class="document-tags">
-              <span class="tag">technical</span>
-              <span class="tag">documentation</span>
-              <span class="tag">architecture</span>
-            </div>
-          </div>
-          <div class="document-actions">
-            <button class="btn btn-sm btn-outline document-view-btn" data-document-id="technical-docs">
-              <span class="icon">👁️</span>
-              View
-            </button>
-            <button class="btn btn-sm btn-outline document-chat-btn" data-document-id="technical-docs">
-              <span class="icon">💬</span>
-              Chat
-            </button>
-            <div class="document-menu">
-              <button class="btn btn-sm btn-outline document-menu-btn" data-document-id="technical-docs">
-                <span class="icon">⋯</span>
-              </button>
-              <div class="document-menu-dropdown" data-document-id="technical-docs">
-                <a href="/documents/technical-docs/download" class="menu-item">
-                  <span class="icon">⬇️</span>
-                  Download
-                </a>
-                <a href="/documents/technical-docs/share" class="menu-item">
-                  <span class="icon">📤</span>
-                  Share
-                </a>
-                <a href="/documents/technical-docs/rename" class="menu-item">
-                  <span class="icon">✏️</span>
-                  Rename
-                </a>
-                <button class="menu-item document-delete-btn" data-document-id="technical-docs">
-                  <span class="icon">🗑️</span>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="document-card" data-document-id="meeting-notes" data-type="Text" data-date="2025-01-13" data-name="Meeting Notes - Team Sync">
-          <div class="document-icon">📋</div>
-          <div class="document-info">
-            <h3 class="document-title">
-              <a href="/documents/meeting-notes" class="document-link">Meeting Notes - Team Sync</a>
-            </h3>
-            <p class="document-meta">Text • 45 KB • Jan 13, 2025</p>
-            <p class="document-description">Weekly team synchronization meeting notes and action items.</p>
-            <div class="document-tags">
-              <span class="tag">meetings</span>
-              <span class="tag">notes</span>
-              <span class="tag">team</span>
-            </div>
-          </div>
-          <div class="document-actions">
-            <button class="btn btn-sm btn-outline document-view-btn" data-document-id="meeting-notes">
-              <span class="icon">👁️</span>
-              View
-            </button>
-            <button class="btn btn-sm btn-outline document-chat-btn" data-document-id="meeting-notes">
-              <span class="icon">💬</span>
-              Chat
-            </button>
-            <div class="document-menu">
-              <button class="btn btn-sm btn-outline document-menu-btn" data-document-id="meeting-notes">
-                <span class="icon">⋯</span>
-              </button>
-              <div class="document-menu-dropdown" data-document-id="meeting-notes">
-                <a href="/documents/meeting-notes/download" class="menu-item">
-                  <span class="icon">⬇️</span>
-                  Download
-                </a>
-                <a href="/documents/meeting-notes/share" class="menu-item">
-                  <span class="icon">📤</span>
-                  Share
-                </a>
-                <a href="/documents/meeting-notes/rename" class="menu-item">
-                  <span class="icon">✏️</span>
-                  Rename
-                </a>
-                <button class="menu-item document-delete-btn" data-document-id="meeting-notes">
-                  <span class="icon">🗑️</span>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-
       <!-- Empty State (hidden by default) -->
       <div class="empty-state" id="empty-state" style="display: none;">
         <div class="empty-icon">📄</div>
-        <h3>No documents yet</h3>
+        <h3>No document preview yet</h3>
         <p>Upload your first document to get started with KeyStroke.</p>
         <a href="#upload-modal" class="btn btn-primary">Upload Document</a>
       </div>

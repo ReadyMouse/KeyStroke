@@ -62,11 +62,58 @@ export async function downloadFileToPath(
   cid: string, 
   outputPath: string
 ): Promise<void> {
-  const fs = await import('fs/promises')
-  const buffer = await downloadFileAsBuffer(api, cid)
+  const fs = await import('fs')
+  const { pipeline } = await import('stream/promises')
   
   try {
-    await fs.writeFile(outputPath, buffer)
+    console.log(`📥 Downloading file with CID: ${cid}`)
+    
+    // Check if file is encrypted first
+    const statusResponse = await api.sendDownloadRequest(
+      `/downloads/${cid}/status`,
+      { method: 'GET' }
+    )
+
+    if (!statusResponse.ok) {
+      const error = await statusResponse.text()
+      if (error.includes('encrypted') || error.includes('password')) {
+        throw new Error('File is encrypted and requires a password')
+      }
+      throw new Error(`Failed to check file status: ${statusResponse.statusText}`)
+    }
+
+    // Download the file directly
+    const response = await api.sendDownloadRequest(
+      `/downloads/${cid}?ignoreEncoding=true`,
+      {
+        method: 'GET',
+        headers: new Headers({
+          'Accept': 'application/octet-stream'
+        })
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to download file: ${response.statusText}`)
+    }
+
+    // Get the binary data as a blob
+    const blob = await response.blob()
+    const arrayBuffer = await blob.arrayBuffer()
+    let buffer = Buffer.from(arrayBuffer)
+    
+    // Check if the data is zlib compressed (starts with 78 da)
+    if (buffer[0] === 0x78 && buffer[1] === 0xda) {
+      console.log('File is zlib compressed, decompressing...')
+      const zlib = await import('zlib')
+      const { promisify } = await import('util')
+      const inflate = promisify(zlib.inflate)
+      buffer = await inflate(buffer)
+    }
+    
+    // Write the decompressed data to file
+    await fs.promises.writeFile(outputPath, buffer)
+    
     console.log(`💾 File saved to: ${outputPath}`)
   } catch (error) {
     console.error(`❌ Error saving file to ${outputPath}:`, error)
